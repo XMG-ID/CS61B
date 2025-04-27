@@ -39,15 +39,14 @@ public class ArrayDeque<T> implements Deque<T> {
     private void resize() {
         int REFACTOR = 2;//Simulate the ratio of resize
         T[] newItems = (T[]) new Object[size * REFACTOR];
-        //Copy the items by its order from first to last by directly removing the first item
-        for (int i = 0; i < items.length; i++) {
-            newItems[i] = removeFirst();
+        int first = (nextFirst+1)%items.length;
+        for (int i = 0; i < size; i++) {
+            newItems[i] = items[(first+i)%items.length];
         }
-        size = items.length;//Regain the actual size, because it's changed during the removeFirst session
-        items = newItems;
         //Change nextFirst and nextLast
         nextFirst = newItems.length - 1;
         nextLast = size;
+        items = newItems;
     }
 
     /*Return true if the deque is empty, false otherwise*/
@@ -63,15 +62,11 @@ public class ArrayDeque<T> implements Deque<T> {
     /*Print all the items from first to last, seperated by a space
     Once all items have been printed, print out a new line*/
     public void printDeque() {
-        //Also use removeFirst method, remember to reset the size, nextFirst, nextLast variable
-        int oriNextFirst = nextFirst, oriNextLast = nextLast, oriSize = size;
-        while (size > 0) {
-            System.out.print(removeFirst() + " ");
+        int first = (nextFirst+1)%items.length;
+        for (int i = 0; i < size; i++) {
+            System.out.print(items[(first+i)%items.length]+" ");
         }
         System.out.println();
-        nextFirst = oriNextFirst;
-        nextLast = oriNextLast;
-        size = oriSize;
     }
 
     /*Remove and return the item at the front of the deque.

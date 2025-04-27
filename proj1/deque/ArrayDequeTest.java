@@ -1,0 +1,83 @@
+package deque;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
+
+public class ArrayDequeTest {
+    @Test
+    /*Test addFirst and addLast without resizing*/
+    public void testNoResizeAdd(){
+        ArrayDeque<Integer> ad = new ArrayDeque<>();
+        for(int i=0;i<4;i++){
+            ad.addFirst(i);
+            ad.addLast(i+1);
+        }
+    }
+
+    @Test
+    /*Test add method which will invoke resize*/
+    public void testResize(){
+        ArrayDeque<Integer> ad = new ArrayDeque<>();
+        for(int i=0;i<100;i++){
+            ad.addFirst(i);
+            ad.addLast(i+1);
+        }
+    }
+
+    @Test
+    /*Test removeFirst and removeLast*/
+    public void remove(){
+        ArrayDeque<Integer> ad = new ArrayDeque<>();
+        for(int i=0;i<4;i++){
+            ad.addFirst(i);
+            ad.addLast(i+1);
+        }
+        //[0 / 1 2 3 last:4 first:3 2 1]
+        assertEquals(3,(int)ad.removeFirst());
+        assertEquals(4,(int)ad.removeLast());
+        assertEquals(2,(int)ad.removeFirst());
+        assertEquals(3,(int)ad.removeLast());
+        assertEquals(1,(int)ad.removeFirst());
+        assertEquals(2,(int)ad.removeLast());
+        assertEquals(1,(int)ad.removeLast());
+        assertEquals(0,(int)ad.removeLast());
+
+    }
+
+    @Test
+    /*Test get method*/
+    public void testGet(){
+        ArrayDeque<Integer> ad = new ArrayDeque<>();
+        for(int i=0;i<4;i++){
+            ad.addFirst(i);
+            ad.addLast(i+1);
+        }
+        //[0 / 1 2 3 last:4 first:3 2 1]
+        assertEquals(3,(int)ad.get(0));
+        assertEquals(2,(int)ad.get(1));
+        assertEquals(1,(int)ad.get(2));
+        assertEquals(0,(int)ad.get(3));
+        assertEquals(1,(int)ad.get(4));
+        assertEquals(2,(int)ad.get(5));
+        assertEquals(3,(int)ad.get(6));
+        assertEquals(4,(int)ad.get(7));
+    }
+
+    @Test
+    /*Test printDeque method, it should not spoil the size, nextFirst and nextLast variable*/
+    public void testPrintDeque(){
+        //Create a deque 1,2,3,...,100
+        ArrayDeque<Integer> ad = new ArrayDeque<>();
+        for(int i=0;i<=100;i++){
+            ad.addLast(i);
+        }
+        ad.printDeque();
+        //Test whether the other method goes well after calling printDeque
+        assertEquals(50,(int)ad.get(50));
+        assertEquals(0,(int)ad.removeFirst());
+        assertEquals(100,(int)ad.removeLast());
+        assertEquals(99,ad.size());
+        assertEquals(51,(int)ad.get(50));
+    }
+}
