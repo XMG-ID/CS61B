@@ -1,5 +1,7 @@
 package deque;
 
+import edu.princeton.cs.algs4.In;
+import edu.princeton.cs.algs4.Stopwatch;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -11,7 +13,7 @@ import static org.junit.Assert.*;
 public class LinkedListDequeTest {
 
     @Test
-     /* Adds a few things to the list, checking isEmpty() and size() are correct,
+    /* Adds a few things to the list, checking isEmpty() and size() are correct,
      * finally printing the results.
      * && is the "and" operation. */
     public void addIsEmptySizeTest() {
@@ -131,11 +133,11 @@ public class LinkedListDequeTest {
         for (int i = 0; i <= 100; i++) {
             lld.addLast(i);
         }
-        assertEquals(12, (int)lld.get(12));
+        assertEquals(12, (int) lld.get(12));
     }
 
     @Test
-    public void testPrintDeque(){
+    public void testPrintDeque() {
         LinkedListDeque<Integer> lld = new LinkedListDeque<Integer>();
         for (int i = 0; i <= 10; i++) {
             lld.addLast(i);
@@ -143,9 +145,9 @@ public class LinkedListDequeTest {
         lld.printDeque();
     }
 
-    /*@Test
+    @Test
     //Test get and getRecursive if their time is expected
-    public void testGetAndGetRecursive(){
+    public void testGetAndGetRecursive() {
         LinkedListDeque<Integer> lld = new LinkedListDeque<Integer>();
         for (int i = 0; i <= 100; i++) {
             lld.addLast(i);
@@ -154,13 +156,41 @@ public class LinkedListDequeTest {
         Stopwatch sw = new Stopwatch();
         lld.get(50);
         double timeGet = sw.elapsedTime();
-        System.out.println("Get methods takes:"+ timeGet);
+        System.out.println("Get methods takes:" + timeGet);
 
         Stopwatch sw1 = new Stopwatch();
         lld.getRecursive(50);
         double timeGetRecursive = sw1.elapsedTime();
-        System.out.println("GetRecursive methods takes:"+ timeGet);
-    }*/
+        System.out.println("GetRecursive methods takes:" + timeGet);
+    }
+
+    @Test
+    public void testIterator() {
+        LinkedListDeque<Integer> lld = new LinkedListDeque<>();
+        for (int i = 0; i < 10; i++) {
+            lld.addLast(i);
+        }
+        for (Integer item : lld) {
+            System.out.println(item);
+        }
+    }
+
+    @Test
+    public void testEquals(){
+        LinkedListDeque<Integer> lld = new LinkedListDeque<>();
+        for (int i = 0; i < 10; i++) {
+            lld.addLast(i);
+        }
+        LinkedListDeque<Integer> lld0 = new LinkedListDeque<>();
+        for (int i = 0; i < 10; i++) {
+            lld0.addLast(i);
+        }
+        assertEquals(true,lld0.equals(lld));
+        assertEquals(false,lld.equals("123"));
+        assertEquals(false,lld.equals(null));
+        assertEquals(false,lld.equals(1));
+        assertEquals(true,lld.equals(lld));
+    }
 
 
 }
