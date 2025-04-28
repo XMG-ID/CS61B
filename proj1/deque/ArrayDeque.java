@@ -1,6 +1,30 @@
 package deque;
 
-public class ArrayDeque<T> implements Deque<T> {
+import java.util.Iterator;
+
+public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
+    private class ArrayDequeIterator implements Iterator<T> {
+        private int cnt;
+
+        public ArrayDequeIterator() {
+            cnt = 0;//cnt refers to the items we have seen
+        }
+
+        @Override
+        public boolean hasNext() {
+            return cnt != size;
+        }
+
+        @Override
+        public T next() {
+            int index = (nextFirst + cnt + 1) % items.length;
+            cnt++;
+            return items[index];
+        }
+
+    }
+
+
     private int nextFirst;
     private int nextLast;
     private int size;
@@ -39,9 +63,9 @@ public class ArrayDeque<T> implements Deque<T> {
     private void resize() {
         int REFACTOR = 2;//Simulate the ratio of resize
         T[] newItems = (T[]) new Object[size * REFACTOR];
-        int first = (nextFirst+1)%items.length;
+        int first = (nextFirst + 1) % items.length;
         for (int i = 0; i < size; i++) {
-            newItems[i] = items[(first+i)%items.length];
+            newItems[i] = items[(first + i) % items.length];
         }
         //Change nextFirst and nextLast
         nextFirst = newItems.length - 1;
@@ -62,9 +86,9 @@ public class ArrayDeque<T> implements Deque<T> {
     /*Print all the items from first to last, seperated by a space
     Once all items have been printed, print out a new line*/
     public void printDeque() {
-        int first = (nextFirst+1)%items.length;
+        int first = (nextFirst + 1) % items.length;
         for (int i = 0; i < size; i++) {
-            System.out.print(items[(first+i)%items.length]+" ");
+            System.out.print(items[(first + i) % items.length] + " ");
         }
         System.out.println();
     }
@@ -101,5 +125,30 @@ public class ArrayDeque<T> implements Deque<T> {
         }
         int targetIndex = (nextFirst + 1 + index) % items.length;
         return items[targetIndex];
+    }
+
+    @Override
+    public Iterator<T> iterator() {
+        return new ArrayDequeIterator();
+    }
+
+    @Override
+    public boolean equals(Object o){
+        if (o == this) {
+            return true;
+        }
+        if (!(o instanceof Deque)) {
+            return false;
+        }
+        Deque<T> other = (Deque<T>) o;
+        if (other.size() != this.size()) {
+            return false;
+        }
+        for (int i = 0; i < this.size(); i++) {
+            if (!this.get(i).equals(other.get(i))) {
+                return false;
+            }
+        }
+        return true;
     }
 }
