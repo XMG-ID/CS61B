@@ -7,7 +7,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
         private int cnt;
 
         public ArrayDequeIterator() {
-            cnt = 0;//cnt refers to the items we have seen
+            cnt = 0; //cnt refers to the items we have seen
         }
 
         @Override
@@ -30,6 +30,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
     private int size;
     private T[] items;
     private static final int START_SIZE = 8;
+    private static final int REFACROR = 2;
 
     /*Create an empty array deque*/
     public ArrayDeque() {
@@ -61,8 +62,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
 
     /*Resize the array and change the nextFirst, nextLast position*/
     private void resize() {
-        int REFACTOR = 2;//Simulate the ratio of resize
-        T[] newItems = (T[]) new Object[size * REFACTOR];
+        T[] newItems = (T[]) new Object[size * REFACROR];
         int first = (nextFirst + 1) % items.length;
         for (int i = 0; i < size; i++) {
             newItems[i] = items[(first + i) % items.length];
@@ -133,7 +133,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
     }
 
     @Override
-    public boolean equals(Object o){
+    public boolean equals(Object o) {
         if (o == this) {
             return true;
         }

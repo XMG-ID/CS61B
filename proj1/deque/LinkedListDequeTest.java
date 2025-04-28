@@ -176,7 +176,7 @@ public class LinkedListDequeTest {
     }
 
     @Test
-    public void testEquals(){
+    public void testEquals() {
         LinkedListDeque<Integer> lld = new LinkedListDeque<>();
         for (int i = 0; i < 10; i++) {
             lld.addLast(i);
@@ -185,11 +185,22 @@ public class LinkedListDequeTest {
         for (int i = 0; i < 10; i++) {
             lld0.addLast(i);
         }
-        assertEquals(true,lld0.equals(lld));
-        assertEquals(false,lld.equals("123"));
-        assertEquals(false,lld.equals(null));
-        assertEquals(false,lld.equals(1));
-        assertEquals(true,lld.equals(lld));
+        assertEquals(true, lld0.equals(lld));
+        assertEquals(false, lld.equals("123"));
+        assertEquals(false, lld.equals(null));
+        assertEquals(false, lld.equals(1));
+        assertEquals(true, lld.equals(lld));
+    }
+
+    /*Test errors in the LLD found by autograder*/
+    @Test
+    public void test1() {
+        LinkedListDeque<Integer> lld = new LinkedListDeque<>();
+        lld.addFirst(0);
+        assertEquals(0, (int)lld.removeLast());
+        assertEquals(true,lld.isEmpty());
+        lld.addFirst(3);
+        assertEquals(3,(int)lld.removeLast());
     }
 
 
