@@ -1,6 +1,5 @@
 package deque;
 
-import edu.princeton.cs.algs4.Stopwatch;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -12,9 +11,8 @@ import static org.junit.Assert.*;
 public class LinkedListDequeTest {
 
     @Test
-     /** Adds a few things to the list, checking isEmpty() and size() are correct,
+     /* Adds a few things to the list, checking isEmpty() and size() are correct,
      * finally printing the results.
-     *
      * && is the "and" operation. */
     public void addIsEmptySizeTest() {
 
@@ -40,7 +38,7 @@ public class LinkedListDequeTest {
     }
 
     @Test
-    /** Adds an item, then removes an item, and ensures that dll is empty afterwards. */
+    /* Adds an item, then removes an item, and ensures that dll is empty afterwards. */
     public void addRemoveTest() {
         LinkedListDeque<Integer> lld1 = new LinkedListDeque<Integer>();
         // should be empty
@@ -145,8 +143,8 @@ public class LinkedListDequeTest {
         lld.printDeque();
     }
 
-    @Test
-    /*Test get and getRecursive if their time is expected*/
+    /*@Test
+    //Test get and getRecursive if their time is expected
     public void testGetAndGetRecursive(){
         LinkedListDeque<Integer> lld = new LinkedListDeque<Integer>();
         for (int i = 0; i <= 100; i++) {
@@ -162,7 +160,7 @@ public class LinkedListDequeTest {
         lld.getRecursive(50);
         double timeGetRecursive = sw1.elapsedTime();
         System.out.println("GetRecursive methods takes:"+ timeGet);
-    }
+    }*/
 
 
 }
