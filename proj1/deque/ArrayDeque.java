@@ -30,7 +30,6 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
     private int size;
     private T[] items;
     private static final int START_SIZE = 8;
-    private static final int REFACROR = 2;
 
     /*Create an empty array deque*/
     public ArrayDeque() {
@@ -43,7 +42,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
     /*Add an item of type T to the front of the deque assuming item is never null*/
     public void addFirst(T item) {
         if (size == items.length) {
-            resize();
+            resize(items.length * 2);
         }
         items[nextFirst] = item;
         nextFirst = (nextFirst - 1 + items.length) % items.length;
@@ -53,7 +52,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
     /*Adds an item of type T to the back of the deque assuming item is never null*/
     public void addLast(T item) {
         if (size == items.length) {
-            resize();
+            resize(items.length * 2);
         }
         items[nextLast] = item;
         nextLast = (nextLast + 1 + items.length) % items.length;
@@ -61,8 +60,8 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
     }
 
     /*Resize the array and change the nextFirst, nextLast position*/
-    private void resize() {
-        T[] newItems = (T[]) new Object[size * REFACROR];
+    private void resize(int capacity) {
+        T[] newItems = (T[]) new Object[capacity];
         int first = (nextFirst + 1) % items.length;
         for (int i = 0; i < size; i++) {
             newItems[i] = items[(first + i) % items.length];
@@ -99,11 +98,18 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
         if (isEmpty()) {
             return null;
         }
+        if (needResize()) {
+            resize((int)(items.length * 0.5));
+        }
+
         int firstIndex = (nextFirst + 1) % items.length;
+        T firstItem=items[firstIndex];
         nextFirst = firstIndex;
+        items[firstIndex]=null;
         size--;
         return items[firstIndex];
     }
+
 
     /*Remove and return the item at the last of the deque.
     If no such item exists, return null*/
@@ -111,10 +117,24 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
         if (isEmpty()) {
             return null;
         }
+        if (needResize()) {
+            resize((int)(items.length * 0.5));
+        }
         int lastIndex = (nextLast - 1 + items.length) % items.length;
+        T lastItem = items[lastIndex];
+        items[lastIndex]=null;
         nextLast = lastIndex;
         size--;
-        return items[lastIndex];
+        return lastItem;
+    }
+
+    /*Check if we need resize before remove one item*/
+    private boolean needResize() {
+        if (items.length < 16) {
+            return false;
+        }
+        double usageFactor = (double) (size - 1) / (double) items.length;
+        return usageFactor <= 0.25;
     }
 
     /*Get the ith(starting from 0) item from the deque

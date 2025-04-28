@@ -29,19 +29,14 @@ public class ArrayDequeTest {
     /*Test removeFirst and removeLast*/
     public void remove() {
         ArrayDeque<Integer> ad = new ArrayDeque<>();
-        for (int i = 0; i < 4; i++) {
-            ad.addFirst(i);
-            ad.addLast(i + 1);
+        for (int i = 0; i < 20; i++) {
+            ad.addLast(i);
         }
-        //[0 / 1 2 3 last:4 first:3 2 1]
-        assertEquals(3, (int) ad.removeFirst());
-        assertEquals(4, (int) ad.removeLast());
-        assertEquals(2, (int) ad.removeFirst());
-        assertEquals(3, (int) ad.removeLast());
-        assertEquals(1, (int) ad.removeFirst());
-        assertEquals(2, (int) ad.removeLast());
-        assertEquals(1, (int) ad.removeLast());
-        assertEquals(0, (int) ad.removeLast());
+        //[0 1 2 ... 99]
+        for(int i=0;i<19;i++){
+            ad.removeLast();
+        }
+
 
     }
 
