@@ -192,16 +192,7 @@ public class LinkedListDequeTest {
         assertEquals(true, lld.equals(lld));
     }
 
-    /*Test errors in the LLD found by autograder*/
-    @Test
-    public void test1() {
-        LinkedListDeque<Integer> lld = new LinkedListDeque<>();
-        lld.addFirst(0);
-        assertEquals(0, (int)lld.removeLast());
-        assertEquals(true,lld.isEmpty());
-        lld.addFirst(3);
-        assertEquals(3,(int)lld.removeLast());
-    }
+
 
 
 }

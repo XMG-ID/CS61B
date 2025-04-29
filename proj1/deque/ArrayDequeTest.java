@@ -100,4 +100,22 @@ public class ArrayDequeTest {
 
         assertEquals(arrd,lld);
     }
+
+    /*Test errors in the ARRD found by autograder*/
+    @Test
+    public void test1() {
+        ArrayDeque<Integer> lld = new ArrayDeque<>();
+        lld.addFirst(0);
+        assertEquals(0, (int)lld.removeLast());
+        assertEquals(true,lld.isEmpty());
+        lld.addFirst(3);
+        assertEquals(3,(int)lld.removeLast());
+    }
+
+    @Test
+    public void test2(){
+        ArrayDeque<Integer> arrd = new ArrayDeque<>();
+        arrd.addFirst(0);
+        assertEquals(0,(int)arrd.removeFirst());
+    }
 }
