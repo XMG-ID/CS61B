@@ -75,11 +75,6 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
         size++;
     }
 
-    /*Return true if the deque is empty, false otherwise*/
-    @Override
-    public boolean isEmpty() {
-        return size == 0;
-    }
 
     /*Return the number of items in the deque*/
     @Override

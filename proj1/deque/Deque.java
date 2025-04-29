@@ -9,9 +9,6 @@ public interface Deque<T> {
     /*Adds an item of type T to the back of the deque assuming item is never null*/
     void addLast(T item);
 
-    /*Return true if the deque is empty, false otherwise*/
-    boolean isEmpty();
-
     /*Return the number of items in the deque*/
     int size();
 
@@ -30,5 +27,10 @@ public interface Deque<T> {
     /*Get the ith(starting from 0) item from the deque
     If no such item exists, return null*/
     T get(int index);
+
+    /*Return true if the deque is empty, false otherwise*/
+    default boolean isEmpty() {
+        return size() == 0;
+    }
 
 }
