@@ -12,13 +12,13 @@ public class MaxArrayDeque<T> extends ArrayDeque<T> {
 
     /*Return the max item in the deque as governed by the previously given Comparator*/
     public T max() {
-        if(isEmpty()){
+        if (isEmpty()) {
             return null;
         }
         T maxItem = get(0);
         for (int i = 1; i < size(); i++) {
             T curItem = get(i);
-            if(comparator.compare(curItem,maxItem)>0){
+            if (comparator.compare(curItem, maxItem) > 0) {
                 maxItem = curItem;
             }
         }
@@ -27,13 +27,13 @@ public class MaxArrayDeque<T> extends ArrayDeque<T> {
 
     /*Return the max item in the deque as governed by the given parameter Comparator c*/
     public T max(Comparator<T> c) {
-        if(isEmpty()){
+        if (isEmpty()) {
             return null;
         }
         T maxItem = get(0);
         for (int i = 1; i < size(); i++) {
             T curItem = get(i);
-            if(c.compare(curItem,maxItem)>0){
+            if (c.compare(curItem, maxItem) > 0) {
                 maxItem = curItem;
             }
         }

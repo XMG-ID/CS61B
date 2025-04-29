@@ -95,13 +95,13 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
             return null;
         }
         if (needResize()) {
-            resize((int)(items.length * 0.5));
+            resize((int) (items.length * 0.5));
         }
 
         int firstIndex = (nextFirst + 1) % items.length;
-        T firstItem=items[firstIndex];
+        T firstItem = items[firstIndex];
         nextFirst = firstIndex;
-        items[firstIndex]=null;
+        items[firstIndex] = null;
         size--;
         return firstItem;
     }
@@ -114,11 +114,11 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
             return null;
         }
         if (needResize()) {
-            resize((int)(items.length * 0.5));
+            resize((int) (items.length * 0.5));
         }
         int lastIndex = (nextLast - 1 + items.length) % items.length;
         T lastItem = items[lastIndex];
-        items[lastIndex]=null;
+        items[lastIndex] = null;
         nextLast = lastIndex;
         size--;
         return lastItem;

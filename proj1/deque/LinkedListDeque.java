@@ -5,16 +5,16 @@ import java.util.Iterator;
 public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
 
     private class Node {
-        public T item;
-        public Node pre;
-        public Node next;
+        private T item;
+        private Node pre;
+        private Node next;
 
         /*Create a node with nothing in item*/
-        public Node() {
+        Node() {
         }
 
         /*Create a node with given item x, its previous node pre and its next node next*/
-        public Node(T x, Node preNode, Node nextNode) {
+        Node(T x, Node preNode, Node nextNode) {
             item = x;
             pre = preNode;
             next = nextNode;
@@ -22,9 +22,9 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
     }
 
     private class LLDIterator implements Iterator<T> {
-        public Node trace;
+       private Node trace;
 
-        public LLDIterator() {
+        LLDIterator() {
             //We only care about what its next is, trace always points at the node we just get
             trace = sentinel;
         }
