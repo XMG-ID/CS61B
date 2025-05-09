@@ -20,8 +20,8 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
         }
     }
 
-    BSTNode root;
-    int size;
+    private BSTNode root;
+    private int size;
 
     /*Create an empty BSTMap*/
     public BSTMap() {
