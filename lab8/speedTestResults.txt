@@ -1,0 +1,18 @@
+1. Insert random item
+
+Enter # strings to insert into hashmap.ULLMap: 100000
+--Stack Overflow -- couldn't add 100000 strings of length 100.
+
+Enter # strings to insert into your hashmap.MyHashMap: 100000
+class hashmap.MyHashMap: 0.10 sec
+
+Enter # strings to insert into Java's HashMap: 100000
+Java's Built-in HashMap: 0.08 sec
+
+2. Insert lexicographically-increasing item
+
+Enter # strings to insert into hashmap.MyHashMap: 100000
+class hashmap.MyHashMap: 0.04 sec
+
+Enter # strings to insert into Java's HashMap: 100000
+Java's Built-in HashMap: 0.04 sec

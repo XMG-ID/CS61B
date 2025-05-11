@@ -1,6 +1,7 @@
 package capers;
 
 import java.io.File;
+import java.util.Arrays;
 
 import static capers.Utils.*;
 
@@ -8,34 +9,8 @@ import static capers.Utils.*;
  * @author TODO
 */
 public class Main {
-    /**
-     * Runs one of three commands:
-     * story [text] -- Appends "text" + a newline to a story file in the
-     *                 .capers directory. Additionally, prints out the
-     *                 current story.
-     *
-     * dog [name] [breed] [age] -- Persistently creates a dog with
-     *                             the specified parameters; should also print
-     *                             the dog's toString(). Assume dog names are
-     *                             unique.
-     *
-     * birthday [name] -- Advances a dog's age persistently
-     *                    and prints out a celebratory message.
-     *
-     * All persistent data should be stored in a ".capers"
-     * directory in the current working directory.
-     *
-     * Recommended structure (you do not have to follow):
-     *
-     * *YOU SHOULD NOT CREATE THESE MANUALLY,
-     *  YOUR PROGRAM SHOULD CREATE THESE FOLDERS/FILES*
-     *
-     * .capers/ -- top level folder for all persistent data in your lab12 folder
-     *    - dogs/ -- folder containing all of the persistent data for dogs
-     *    - story -- file containing the current story
-     *
-     * @param args arguments from the command line
-     */
+
+    /* Only support three cmd : story, dog, birthday. */
     public static void main(String[] args) {
         if (args.length == 0) {
             Utils.exitWithError("Must have at least one argument");
@@ -52,11 +27,14 @@ public class Main {
             break;
         case "dog":
             validateNumArgs("dog", args, 4);
-            // TODO: make a dog
+            String name = args[1], breed = args[2];
+            int age = Integer.parseInt(args[3]);
+            CapersRepository.makeDog(name, breed, age);
             break;
         case "birthday":
             validateNumArgs("birthday", args, 2);
-            // TODO: celebrate this dog's birthday
+            String dogName = args[1];
+            CapersRepository.celebrateBirthday(dogName);
             break;
         default:
             exitWithError(String.format("Unknown command: %s", args[0]));
