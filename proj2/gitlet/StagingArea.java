@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import static gitlet.Repository.CWD;
 import static gitlet.Repository.OBJECTS_DIR;
 import static gitlet.Utils.*;
 
@@ -23,13 +24,13 @@ public class StagingArea implements Serializable, Dumpable {
     }
 
     /* Stage file for addition. */
-    public void stageFile(String fileName, String blobUID) {
+    public void addFile(String fileName, String blobUID) {
         addedFiles.put(fileName, blobUID);
     }
 
     /* Remove file from staging area means add it to the stagingArea.removedFiles.
-    * So when the next commit is made, it will first inherit all the fileMap from its parent commit,
-    * Then we'll use stagingArea.removedFiles to remove some files. */
+     * So when the next commit is made, it will first inherit all the fileMap from its parent commit,
+     * Then we'll use stagingArea.removedFiles to remove some files. */
     public void removeFile(String fileName) {
         // It doesn't matter, because we just need the fileName
         removedFiles.put(fileName, null);
@@ -46,6 +47,15 @@ public class StagingArea implements Serializable, Dumpable {
         return addedFiles.containsKey(fileName);
     }
 
+    /* Return true if the staging area has removed the file called fileName. */
+    public boolean hasRemovedFile(String fileName) {
+        return removedFiles.containsKey(fileName);
+    }
+
+    /* Return true if the staging area has staged the file called fileName. Whether remove or add. */
+    public boolean hasStagedFile(String fileName) {
+        return hasRemovedFile(fileName) || hasAddedFile(fileName);
+    }
 
     /* Serialize the stagingArea object and store it in the right place. */
     public void save() {
@@ -81,6 +91,44 @@ public class StagingArea implements Serializable, Dumpable {
         return removedFiles;
     }
 
+    /* Return the stagedFiles. */
+    public Map<String, String> getStagedFiles() {
+        Map<String, String> stagedFiles = new HashMap<>();
+        stagedFiles.putAll(removedFiles);
+        stagedFiles.putAll(addedFiles);
+        return stagedFiles;
+    }
+
+
+
+    /* Given the fileName, return true if the file content in CWD is different from that in the staging area.
+     *  If the given file simply doesn't exist in the area, handle the error and exit. */
+    public boolean isFileModified(String fileName){
+        return !isFileUnchanged(fileName);
+    }
+
+    /* Given the fileName, return true if the file content in CWD is the same as that in this commit.
+     *  If the given file simply doesn't exist in the commit, handle the error and exit. */
+    public boolean isFileUnchanged(String fileName){
+        if(!this.hasStagedFile(fileName)){
+            handleErrorAndExit("The file name you pass to isFileModified is invalid.");
+        }
+        // Compare the UID of commitFile and CWDFile to determine whether is modified
+        String fileUID = this.getStagedFiles().get(fileName);
+        Blob blob = new Blob(join(CWD, fileName));
+        return fileUID.equals(blob.getUID());
+    }
+
+
+
+
+
+
+
+
+
+
+
     /* A helper method to print out the needed information
     to check if the object is what we expected. */
     @Override
@@ -93,6 +141,12 @@ public class StagingArea implements Serializable, Dumpable {
         for (String fileName : removedFiles.keySet()) {
             System.out.println(fileName + " -> " + removedFiles.get(fileName));
         }
+    }
+
+    /* A helper method to handleError. */
+    private static void handleErrorAndExit(String errorMessage) {
+        System.out.println(errorMessage);
+        System.exit(0);
     }
 
 }

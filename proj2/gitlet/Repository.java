@@ -24,7 +24,7 @@ public class Repository {
     public static final File HEAD = join(GITLET_DIR, "HEAD");
 
     /* Create a gitlet repository. */
-    public static void createRepository()  {
+    public static void createRepository() {
         // If it's already exists, it should not override the existing .gitlet
         if (GITLET_DIR.exists()) {
             System.out.println("A Gitlet version-control system already exists in the current directory.");
@@ -56,7 +56,7 @@ public class Repository {
     /* Given the fileName(String), add it to the staging area.
     Make its blob(store), in the .gitlet/staging/add(ADD_DIR) directory
     create a file named fileName and its content is the blob SHA-1 code. */
-    public static void add(String fileName)  {
+    public static void add(String fileName) {
         File file = join(CWD, fileName);
         if (!file.exists()) {
             System.out.println("File does not exist.");
@@ -66,14 +66,14 @@ public class Repository {
         blob.save();
         /* If the blob you want to add to the staging area is the same in the current commit version,
         we should remove the file's previous blob in the staging area if it exists. */
-        if (getCurrentCommit().exist(blob)) {
+        if (getCurrentCommit().track(blob)) {
             getStagingArea().getAddedFiles().remove(fileName);
             return;
         }
 
         StagingArea stagingArea = getStagingArea();
         /* If you stage a file, then it should be removed from the removedFiles if it exists. */
-        stagingArea.stageFile(fileName, blob.getUID());
+        stagingArea.addFile(fileName, blob.getUID());
         stagingArea.getRemovedFiles().remove(fileName);
         stagingArea.save();
     }
@@ -121,7 +121,7 @@ public class Repository {
         StagingArea stagingArea = getStagingArea();
         Commit curCommit = getCurrentCommit();
         boolean isStaged = stagingArea.hasAddedFile(fileName);
-        boolean isTracked = curCommit.exist(fileName);
+        boolean isTracked = curCommit.track(fileName);
 
         if (!isStaged && !isTracked) {
             System.out.println("No reason to remove the file.");
@@ -207,8 +207,72 @@ public class Repository {
         System.out.println("=== Removed Files ===");
         printLexically(area.getRemovedFiles());
 
+        System.out.println("=== Modifications Not Staged For Commit ===");
+        printModifiedButNotStaged();
+
+        System.out.println("=== Untracked Files ===");
+        printUntracked();
+
         System.out.println();
     }
+
+    /* Print untracked files. */
+    private static void printUntracked(){
+        StagingArea area = getStagingArea();
+        Commit currentCommit = getCurrentCommit();
+        Set<String> fileSet = new TreeSet<>();
+
+        for(String fileName: Objects.requireNonNull(plainFilenamesIn(CWD))){
+            if(!area.hasAddedFile(fileName) && !currentCommit.track(fileName)){
+                fileSet.add(fileName);
+            }
+        }
+
+        /* Print out the result. */
+        for(String file: fileSet){
+            System.out.println(file);
+        }
+    }
+
+
+
+    /* Print files in the CWD that is modified but not staged. */
+    private static void printModifiedButNotStaged() {
+        Commit currentCommit = getCurrentCommit();
+        StagingArea area = getStagingArea();
+        Set<String> fileSet = new TreeSet<>();
+
+        for (String fileName : getAllFilesFromCWD()) {
+            File CWDFile = join(CWD, fileName);
+            if (currentCommit.track(fileName) && currentCommit.isFileModified(fileName) && area.hasStagedFile(fileName)) {
+                fileSet.add(fileName + " (modified)");
+            } else if (area.hasAddedFile(fileName) && area.isFileModified(fileName)) {
+                fileSet.add(fileName + " (modified)");
+            } else if (area.hasAddedFile(fileName) && !CWDFile.exists()) {
+                fileSet.add(fileName + " (deleted)");
+            } else if (currentCommit.track(fileName) && !CWDFile.exists() && !area.hasRemovedFile(fileName)) {
+                fileSet.add(fileName + " (deleted)");
+            }
+        }
+
+        /* Print out the result. */
+        for(String file: fileSet){
+            System.out.println(file);
+        }
+    }
+
+
+    /* Return all the files exist in staging area, the current commit or the CWD. */
+    private static Set<String> getAllFilesFromCWD() {
+        Set<String> allFiles = new HashSet<>();
+        Commit currentCommit = getCurrentCommit();
+        StagingArea area = getStagingArea();
+        allFiles.addAll(currentCommit.fileMap.keySet());
+        allFiles.addAll(area.getStagedFiles().keySet());
+        allFiles.addAll(Objects.requireNonNull(plainFilenamesIn(CWD)));
+        return allFiles;
+    }
+
 
     /* Give checkoutFile two parameters(fileName and commitUID) or just one(fileName)
      * With only one fileName, we assume the file should be in the current commit in default.
@@ -228,7 +292,7 @@ public class Repository {
         if (commit == null) {
             handleErrorAndExit("No commit with that id exists.");
         }
-        if (!commit.exist(fileName)) {
+        if (!commit.track(fileName)) {
             handleErrorAndExit("File does not exist in that commit.");
         }
 
@@ -323,7 +387,7 @@ public class Repository {
 
 
     /* Merge files from the given branch into the current branch. */
-    public static void merge(String givenBranch)  {
+    public static void merge(String givenBranch) {
         String currentBranch = getCurrentBranch();
         File currentBranchFile = join(REFS_DIR, currentBranch);
         File givenBranchFile = join(REFS_DIR, givenBranch);
@@ -362,7 +426,7 @@ public class Repository {
 
 
     /* Simply merge the files according to the 8 rules, return true if it has merge conflict. */
-    private static boolean mergeFiles(Commit current, Commit given, Commit split)  {
+    private static boolean mergeFiles(Commit current, Commit given, Commit split) {
         Set<String> allFiles = getAllFiles(current, given, split);
         StagingArea area = getStagingArea();
         boolean hasConflict = false;
@@ -384,7 +448,7 @@ public class Repository {
 
             if (givenModified && !currentModified) {// Only modify in the given branch
                 checkoutFile(fileName, given.getUID());
-                area.stageFile(fileName, UIDInGiven);
+                area.addFile(fileName, UIDInGiven);
             } else if (currentModified && !givenModified) {// Only modify in the current branch
                 continue;
             } else if (sameModified) {// Two branch have the same modification
@@ -393,7 +457,7 @@ public class Repository {
                 continue;
             } else if (givenAdded && !currentAdded) { // Only add in the given branch
                 checkoutFile(fileName, given.getUID());
-                area.stageFile(fileName, UIDInGiven);
+                area.addFile(fileName, UIDInGiven);
             } else if (givenRemoved && !currentModified) { // Exist in splitPoint but removed in given, unmodified in current
                 remove(fileName);
             } else if (currentRemoved) { // Exist in splitPoint but removed in current, unmodified in given
@@ -412,7 +476,7 @@ public class Repository {
 
     /* Given the file name, rewrite the file with conflict message.
      *  The file is expected to exist in the CWD. If not just create it. */
-    private static void rewriteConflictFile(String fileName, String UIDInCurrent, String UIDInGiven){
+    private static void rewriteConflictFile(String fileName, String UIDInCurrent, String UIDInGiven) {
         // Locate the conflict file in the CWD, current branch and given branch
         File conflictFile = join(CWD, fileName);
         File currentFile = join(OBJECTS_DIR, UIDInCurrent);
@@ -583,11 +647,11 @@ public class Repository {
     }
 
     /* When we create a new file in the CWD, createNewFile may throw a IOException.
-    *  This method is to handle this type of exception to avoid redundancy. */
-    private static void tryCreate(File file){
-        try{
+     *  This method is to handle this type of exception to avoid redundancy. */
+    private static void tryCreate(File file) {
+        try {
             file.createNewFile();
-        }catch (IOException e){
+        } catch (IOException e) {
             System.err.println("Failed to create file: " + file.getPath());
         }
     }

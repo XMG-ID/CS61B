@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import static gitlet.Repository.CWD;
 import static gitlet.Repository.OBJECTS_DIR;
 import static gitlet.Utils.*;
 
@@ -94,17 +95,13 @@ public class Commit implements Serializable, Dumpable {
 
 
 
-
-
-
-
     /* Return true if the commit contains the blob. */
-    public boolean exist(Blob blob) {
+    public boolean track(Blob blob) {
         return fileMap.containsValue(blob.getUID());
     }
 
     /* Return true if the commit contains the file. */
-    public boolean exist(String fileName) {
+    public boolean track(String fileName) {
         return fileMap.containsKey(fileName);
     }
 
@@ -137,6 +134,35 @@ public class Commit implements Serializable, Dumpable {
     }
 
 
+    /* Given the fileName, return true if the file content in CWD is different from that in this commit.
+    *  If the given file simply doesn't exist in the commit, handle the error and exit. */
+    public boolean isFileModified(String fileName){
+        return !isFileUnchanged(fileName);
+    }
+
+    /* Given the fileName, return true if the file content in CWD is the same as that in this commit.
+     *  If the given file simply doesn't exist in the commit, handle the error and exit. */
+    public boolean isFileUnchanged(String fileName){
+        if(!this.track(fileName)){
+            handleErrorAndExit("The file name you pass to isFileModified is invalid.");
+        }
+        // Compare the UID of commitFile and CWDFile to determine whether is modified
+        String fileUID = this.getFileUID(fileName);
+        Blob blob = new Blob(join(CWD, fileName));
+        return fileUID.equals(blob.getUID());
+    }
+
+
+
+
+
+
+
+
+
+
+
+
     /* Return true if the two commit has the same UID. */
     @Override
     public boolean equals(Object other){
@@ -157,6 +183,12 @@ public class Commit implements Serializable, Dumpable {
         for (String fileName : fileMap.keySet()) {
             System.out.println(fileName + " -> " + fileMap.get(fileName));
         }
+    }
+
+    /* A helper method to handleError. */
+    private static void handleErrorAndExit(String errorMessage) {
+        System.out.println(errorMessage);
+        System.exit(0);
     }
 
 }

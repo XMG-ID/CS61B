@@ -41,6 +41,14 @@ public class Blob implements Serializable, Dumpable {
         writeObject(blobFile, this);
     }
 
+
+
+
+
+
+
+
+
     /* A helper method to print out the needed information
     to check if the object is what we expected. */
     @Override
