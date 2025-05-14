@@ -1,6 +1,5 @@
 package gitlet;
 
-import java.io.IOException;
 /* Understandings of git command:
 *  Whenever we change the head, the CWD's file will be converted into the commit pointed by head.
 *  reset commit :  change the head of the current branch to the given commit
@@ -9,8 +8,10 @@ import java.io.IOException;
 /* Driver class for Gitlet, a subset of the Git version-control system.*/
 public class Main {
 
-    public static void main(String[] args) throws IOException {
-        // TODO: what if args is empty?
+    public static void main(String[] args)  {
+        if(args.length == 0){
+            handleErrorAndExit("Required command is missing.");
+        }
         String firstArg = args[0];
         switch (firstArg) {
             case "init":

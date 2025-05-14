@@ -18,7 +18,7 @@ public class Blob implements Serializable, Dumpable {
     private String blobUID;
 
     /* Take in a file to create the file blob. */
-    public Blob(File file) throws IOException {
+    public Blob(File file)  {
         fileName = file.getName();
         content = readContents(file);
         blobUID = sha1((Object) serialize(this));

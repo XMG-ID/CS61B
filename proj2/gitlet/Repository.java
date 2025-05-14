@@ -24,7 +24,7 @@ public class Repository {
     public static final File HEAD = join(GITLET_DIR, "HEAD");
 
     /* Create a gitlet repository. */
-    public static void createRepository() throws IOException {
+    public static void createRepository()  {
         // If it's already exists, it should not override the existing .gitlet
         if (GITLET_DIR.exists()) {
             System.out.println("A Gitlet version-control system already exists in the current directory.");
@@ -34,14 +34,14 @@ public class Repository {
         GITLET_DIR.mkdirs();
         OBJECTS_DIR.mkdirs();
         REFS_DIR.mkdirs();
-        HEAD.createNewFile();
+        tryCreate(HEAD);
 
         Commit initialCommit = new Commit("initial commit", null, null, new HashMap<>());
         initialCommit.save();
 
         // Create the master branch
         File master = join(REFS_DIR, "master");
-        master.createNewFile();
+        tryCreate(master);
         writeContents(master, initialCommit.getUID());
 
         // .gitlet/HEAD file store the current branch. It starts with master
@@ -56,7 +56,7 @@ public class Repository {
     /* Given the fileName(String), add it to the staging area.
     Make its blob(store), in the .gitlet/staging/add(ADD_DIR) directory
     create a file named fileName and its content is the blob SHA-1 code. */
-    public static void add(String fileName) throws IOException {
+    public static void add(String fileName)  {
         File file = join(CWD, fileName);
         if (!file.exists()) {
             System.out.println("File does not exist.");
@@ -323,7 +323,7 @@ public class Repository {
 
 
     /* Merge files from the given branch into the current branch. */
-    public static void merge(String givenBranch) throws IOException {
+    public static void merge(String givenBranch)  {
         String currentBranch = getCurrentBranch();
         File currentBranchFile = join(REFS_DIR, currentBranch);
         File givenBranchFile = join(REFS_DIR, givenBranch);
@@ -362,7 +362,7 @@ public class Repository {
 
 
     /* Simply merge the files according to the 8 rules, return true if it has merge conflict. */
-    private static boolean mergeFiles(Commit current, Commit given, Commit split) throws IOException {
+    private static boolean mergeFiles(Commit current, Commit given, Commit split)  {
         Set<String> allFiles = getAllFiles(current, given, split);
         StagingArea area = getStagingArea();
         boolean hasConflict = false;
@@ -412,13 +412,13 @@ public class Repository {
 
     /* Given the file name, rewrite the file with conflict message.
      *  The file is expected to exist in the CWD. If not just create it. */
-    private static void rewriteConflictFile(String fileName, String UIDInCurrent, String UIDInGiven) throws IOException {
+    private static void rewriteConflictFile(String fileName, String UIDInCurrent, String UIDInGiven){
         // Locate the conflict file in the CWD, current branch and given branch
         File conflictFile = join(CWD, fileName);
         File currentFile = join(OBJECTS_DIR, UIDInCurrent);
         File givenFile = join(OBJECTS_DIR, UIDInGiven);
         if (!conflictFile.exists()) {
-            conflictFile.createNewFile();
+            tryCreate(conflictFile);
         }
         // Rewrite it with the conflict message
         Formatter formatter = new Formatter();
@@ -580,6 +580,16 @@ public class Repository {
     private static void handleErrorAndExit(String errorMessage) {
         System.out.println(errorMessage);
         System.exit(0);
+    }
+
+    /* When we create a new file in the CWD, createNewFile may throw a IOException.
+    *  This method is to handle this type of exception to avoid redundancy. */
+    private static void tryCreate(File file){
+        try{
+            file.createNewFile();
+        }catch (IOException e){
+            System.err.println("Failed to create file: " + file.getPath());
+        }
     }
 
 }
