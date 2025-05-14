@@ -82,7 +82,7 @@ public class Repository {
 
     /* Make a current commit and save. */
     public static void commit(String message) {
-        if(message.isEmpty()){
+        if (message.isEmpty()) {
             handleErrorAndExit("Please enter a commit message.");
         }
         commit(message, null);
@@ -194,7 +194,7 @@ public class Repository {
 
     /* Print out the Branches, Staged Files and Removed Files in lexicographic order. */
     public static void status() {
-        if(!GITLET_DIR.exists()){
+        if (!GITLET_DIR.exists()) {
             handleErrorAndExit("Not in an initialized Gitlet directory.");
         }
 
@@ -221,23 +221,22 @@ public class Repository {
     }
 
     /* Print untracked files. */
-    private static void printUntracked(){
+    private static void printUntracked() {
         StagingArea area = getStagingArea();
         Commit currentCommit = getCurrentCommit();
         Set<String> fileSet = new TreeSet<>();
 
-        for(String fileName: Objects.requireNonNull(plainFilenamesIn(CWD))){
-            if(!area.hasAddedFile(fileName) && !currentCommit.track(fileName)){
+        for (String fileName : Objects.requireNonNull(plainFilenamesIn(CWD))) {
+            if (!area.hasAddedFile(fileName) && !currentCommit.track(fileName)) {
                 fileSet.add(fileName);
             }
         }
 
         /* Print out the result. */
-        for(String file: fileSet){
+        for (String file : fileSet) {
             System.out.println(file);
         }
     }
-
 
 
     /* Print files in the CWD that is modified but not staged. */
@@ -248,13 +247,13 @@ public class Repository {
 
         for (String fileName : getAllFilesFromCWD()) {
             File CWDFile = join(CWD, fileName);
-            if(CWDFile.exists()){
+            if (CWDFile.exists()) {
                 if (currentCommit.track(fileName) && currentCommit.isFileModified(fileName) && !area.hasStagedFile(fileName)) {
                     fileSet.add(fileName + " (modified)");
                 } else if (area.hasAddedFile(fileName) && area.isFileModified(fileName)) {
                     fileSet.add(fileName + " (modified)");
                 }
-            }else{
+            } else {
                 if (area.hasAddedFile(fileName) && !CWDFile.exists()) {
                     fileSet.add(fileName + " (deleted)");
                 } else if (currentCommit.track(fileName) && !CWDFile.exists() && !area.hasRemovedFile(fileName)) {
@@ -265,11 +264,11 @@ public class Repository {
         }
 
         /* Print out the result. */
-        if(fileSet.isEmpty()){
+        if (fileSet.isEmpty()) {
             System.out.println();
             return;
         }
-        for(String file: fileSet){
+        for (String file : fileSet) {
             System.out.println(file);
         }
     }

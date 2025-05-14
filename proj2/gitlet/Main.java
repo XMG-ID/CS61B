@@ -1,15 +1,15 @@
 package gitlet;
 
 /* Understandings of git command:
-*  Whenever we change the head, the CWD's file will be converted into the commit pointed by head.
-*  reset commit :  change the head of the current branch to the given commit
-* */
+ *  Whenever we change the head, the CWD's file will be converted into the commit pointed by head.
+ *  reset commit :  change the head of the current branch to the given commit
+ * */
 
 /* Driver class for Gitlet, a subset of the Git version-control system.*/
 public class Main {
 
-    public static void main(String[] args)  {
-        if(args.length == 0){
+    public static void main(String[] args) {
+        if (args.length == 0) {
             handleErrorAndExit("Please enter a command.");
         }
         String firstArg = args[0];

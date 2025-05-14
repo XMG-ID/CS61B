@@ -100,17 +100,16 @@ public class StagingArea implements Serializable, Dumpable {
     }
 
 
-
     /* Given the fileName, return true if the file content in CWD is different from that in the staging area.
      *  If the given file simply doesn't exist in the area, handle the error and exit. */
-    public boolean isFileModified(String fileName){
+    public boolean isFileModified(String fileName) {
         return !isFileUnchanged(fileName);
     }
 
     /* Given the fileName, return true if the file content in CWD is the same as that in this commit.
      *  If the given file simply doesn't exist in the commit, handle the error and exit. */
-    public boolean isFileUnchanged(String fileName){
-        if(!this.hasStagedFile(fileName)){
+    public boolean isFileUnchanged(String fileName) {
+        if (!this.hasStagedFile(fileName)) {
             handleErrorAndExit("The file name you pass to isFileModified is invalid.");
         }
         // Compare the UID of commitFile and CWDFile to determine whether is modified
@@ -118,15 +117,6 @@ public class StagingArea implements Serializable, Dumpable {
         Blob blob = new Blob(join(CWD, fileName));
         return fileUID.equals(blob.getUID());
     }
-
-
-
-
-
-
-
-
-
 
 
     /* A helper method to print out the needed information
