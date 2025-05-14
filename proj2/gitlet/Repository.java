@@ -19,7 +19,7 @@ public class Repository {
     public static final File OBJECTS_DIR = join(GITLET_DIR, "objects");
     /* The .gitlet/refs/heads/ directory has many files named after branches' name such as master.
     And in the file is the branch's head commit UID. */
-    public static final File REFS_DIR = join(GITLET_DIR, "refs/heads");
+    public static final File REFS_DIR = join(GITLET_DIR, "refs.heads");
     /* The HEAD file stores the current branch's relative path, such as "refs/heads/master". */
     public static final File HEAD = join(GITLET_DIR, "HEAD");
 
@@ -64,14 +64,16 @@ public class Repository {
         }
         Blob blob = new Blob(file);
         blob.save();
-        /* If the blob you want to add to the staging area is the same in the current commit version,
-        we should remove the file's previous blob in the staging area if it exists. */
+        /* If the current working version of the file is identical to the version in the current commit,
+         * do not stage it to be added, and remove it from the staging area if it is already there. */
+        StagingArea stagingArea = getStagingArea();
         if (getCurrentCommit().track(blob)) {
-            getStagingArea().getAddedFiles().remove(fileName);
+            stagingArea.getAddedFiles().remove(fileName);
+            stagingArea.getRemovedFiles().remove(fileName);
+            stagingArea.save();
             return;
         }
 
-        StagingArea stagingArea = getStagingArea();
         /* If you stage a file, then it should be removed from the removedFiles if it exists. */
         stagingArea.addFile(fileName, blob.getUID());
         stagingArea.getRemovedFiles().remove(fileName);
