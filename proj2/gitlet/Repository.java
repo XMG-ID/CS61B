@@ -80,16 +80,14 @@ public class Repository {
 
     /* Make a current commit and save. */
     public static void commit(String message) {
-        createCommit(message, null);
+        if(message.isEmpty()){
+            handleErrorAndExit("Please enter a commit message.");
+        }
+        commit(message, null);
     }
 
     /* Provide a commit method for merge commit that need to specify the secondParent. */
     private static void commit(String message, String secondParentUID) {
-        createCommit(message, secondParentUID);
-    }
-
-    /* A helper method to simplify the code. */
-    private static void createCommit(String message, String secondParentUID) {
         StagingArea stagingArea = getStagingArea();
         // Handle error case and exit
         if (stagingArea.isEmpty()) {
@@ -261,6 +259,10 @@ public class Repository {
         }
 
         /* Print out the result. */
+        if(fileSet.isEmpty()){
+            System.out.println();
+            return;
+        }
         for(String file: fileSet){
             System.out.println(file);
         }
