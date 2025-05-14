@@ -244,15 +244,20 @@ public class Repository {
 
         for (String fileName : getAllFilesFromCWD()) {
             File CWDFile = join(CWD, fileName);
-            if (currentCommit.track(fileName) && currentCommit.isFileModified(fileName) && area.hasStagedFile(fileName)) {
-                fileSet.add(fileName + " (modified)");
-            } else if (area.hasAddedFile(fileName) && area.isFileModified(fileName)) {
-                fileSet.add(fileName + " (modified)");
-            } else if (area.hasAddedFile(fileName) && !CWDFile.exists()) {
-                fileSet.add(fileName + " (deleted)");
-            } else if (currentCommit.track(fileName) && !CWDFile.exists() && !area.hasRemovedFile(fileName)) {
-                fileSet.add(fileName + " (deleted)");
+            if(CWDFile.exists()){
+                if (currentCommit.track(fileName) && currentCommit.isFileModified(fileName) && area.hasStagedFile(fileName)) {
+                    fileSet.add(fileName + " (modified)");
+                } else if (area.hasAddedFile(fileName) && area.isFileModified(fileName)) {
+                    fileSet.add(fileName + " (modified)");
+                }
+            }else{
+                if (area.hasAddedFile(fileName) && !CWDFile.exists()) {
+                    fileSet.add(fileName + " (deleted)");
+                } else if (currentCommit.track(fileName) && !CWDFile.exists() && !area.hasRemovedFile(fileName)) {
+                    fileSet.add(fileName + " (deleted)");
+                }
             }
+
         }
 
         /* Print out the result. */

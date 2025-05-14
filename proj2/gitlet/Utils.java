@@ -72,7 +72,7 @@ class Utils {
      *  and throws IllegalArgumentException unless the directory designated by
      *  FILE also contains a directory named .gitlet. */
     static boolean restrictedDelete(File file) {
-        if (!file.getAbsolutePath().startsWith(GITLET_DIR.getAbsolutePath())) {
+        if (!(new File(file.getParentFile(), ".gitlet")).isDirectory()) {
             throw new IllegalArgumentException("not .gitlet working directory");
         }
         if (!file.isDirectory()) {

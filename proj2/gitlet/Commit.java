@@ -148,6 +148,7 @@ public class Commit implements Serializable, Dumpable {
         }
         // Compare the UID of commitFile and CWDFile to determine whether is modified
         String fileUID = this.getFileUID(fileName);
+        File CWDFile = join(CWD, fileName);
         Blob blob = new Blob(join(CWD, fileName));
         return fileUID.equals(blob.getUID());
     }
