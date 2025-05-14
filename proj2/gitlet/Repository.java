@@ -249,7 +249,7 @@ public class Repository {
         for (String fileName : getAllFilesFromCWD()) {
             File CWDFile = join(CWD, fileName);
             if(CWDFile.exists()){
-                if (currentCommit.track(fileName) && currentCommit.isFileModified(fileName) && area.hasStagedFile(fileName)) {
+                if (currentCommit.track(fileName) && currentCommit.isFileModified(fileName) && !area.hasStagedFile(fileName)) {
                     fileSet.add(fileName + " (modified)");
                 } else if (area.hasAddedFile(fileName) && area.isFileModified(fileName)) {
                     fileSet.add(fileName + " (modified)");

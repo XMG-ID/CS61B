@@ -10,7 +10,7 @@ public class Main {
 
     public static void main(String[] args)  {
         if(args.length == 0){
-            handleErrorAndExit("Required command is missing.");
+            handleErrorAndExit("Please enter a command.");
         }
         String firstArg = args[0];
         switch (firstArg) {
