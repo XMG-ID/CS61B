@@ -1,26 +1,162 @@
 package gitlet;
 
-// TODO: any imports you need here
+import java.io.File;
+import java.io.Serializable;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 
-import java.util.Date; // TODO: You'll likely use this in this class
+import static gitlet.Repository.OBJECTS_DIR;
+import static gitlet.Utils.*;
 
-/** Represents a gitlet commit object.
- *  TODO: It's a good idea to give a description here of what else this Class
- *  does at a high level.
- *
- *  @author TODO
- */
-public class Commit {
-    /**
-     * TODO: add instance variables here.
-     *
-     * List all instance variables of the Commit class here with a useful
-     * comment above them describing what that variable represents and how that
-     * variable is used. We've provided one example for `message`.
-     */
+/* Represents a gitlet commit object.*/
+public class Commit implements Serializable, Dumpable {
 
-    /** The message of this Commit. */
-    private String message;
+    /* The message of this Commit. */
+    public String message;
+    /* The time when the Commit is created. */
+    public String timestamp;
+    /* The SHA-1 code of its parent Commit. */
+    public String parentUID;
+    /* The SHA-1 code of its second parent Commit. */
+    public String secondParentUID;
+    /* The map of the Commit's files : file name -> file blob's SHA-1. */
+    public Map<String, String> fileMap;
+    /* Store the uid once we won't make any change to the commit object. */
+    private String UID;
 
-    /* TODO: fill in the rest of this class. */
+
+    /* Constructor for one commit. */
+    public Commit(String message, String parentUID, String secondParentUID, Map<String, String> fileMap) {
+        this.message = message;
+        this.timestamp = getCurrentTimestamp();
+        this.parentUID = parentUID;
+        this.secondParentUID = secondParentUID;
+        this.fileMap = fileMap;
+    }
+
+
+    /* Add the files to the fileMap.
+    Whenever we make change to a commit, we must save it. */
+    public void add(Map<String, String> addedFiles) {
+        fileMap.putAll(addedFiles);
+    }
+
+    /* Remove the files in the fileMap.
+    Whenever we make change to a commit, we must save it. */
+    public void remove(Map<String, String> removedFiles) {
+        for (String fileName : removedFiles.keySet()) {
+            fileMap.remove(fileName);
+        }
+    }
+
+    /* Given the fileName, find the version in the current commit and return its content.
+     *  The return type should be byte[] which can represent the real content. */
+    public byte[] getFileContent(String fileName) {
+        File file = join(OBJECTS_DIR, fileMap.get(fileName));
+        Blob blob = readObject(file, Blob.class);
+        return blob.getContent();
+    }
+
+
+    /* Return the commit's parent commit. If not exists, return null. */
+    public Commit parentCommit() {
+        if (this.parentUID == null) {
+            return null;
+        }
+        File parentCommitFile = join(OBJECTS_DIR, this.parentUID);
+        return readObject(parentCommitFile, Commit.class);
+    }
+
+
+    /* Write the commit object to the specified file:
+    Serialize commit itself and store in the .gitlet/objects */
+    public void save() {
+        /* The sequence of iteration for HashMap is truly random.
+         *  So, we should calculate the UID just once and immediately store it. */
+        UID = Utils.sha1((Object) Utils.serialize(this));
+        File commitFile = join(OBJECTS_DIR, this.getUID());
+        writeObject(commitFile, this);
+    }
+
+    /* Return the UID(SHA-1 code) of the commit. */
+    public String getUID() {
+        return UID;
+    }
+
+
+    /* Return the file's UID if it exists in the commit's fileMap. Otherwise, return null. */
+    public String getFileUID(String fileName){
+        return this.fileMap.get(fileName);
+    }
+
+
+
+
+
+
+
+    /* Return true if the commit contains the blob. */
+    public boolean exist(Blob blob) {
+        return fileMap.containsValue(blob.getUID());
+    }
+
+    /* Return true if the commit contains the file. */
+    public boolean exist(String fileName) {
+        return fileMap.containsKey(fileName);
+    }
+
+    /* A helper method to get the current timestamp. */
+    private String getCurrentTimestamp() {
+        SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM d HH:mm:ss yyyy Z", Locale.ENGLISH);
+        return sdf.format(new Date());
+    }
+
+
+    /* Given the commitUID prefix, return the commit object if it exists, otherwise return null.
+     * Error case: if the commitUID prefix can match more than one commitUID.*/
+    public static Commit getCommit(String prefix) {
+        File[] files = OBJECTS_DIR.listFiles();
+        Commit commit = null;
+
+        if (files == null) {
+            return null;
+        }
+        for (File file : files) {
+            if (file.getName().startsWith(prefix)) {
+                if (commit != null) {
+                    System.out.println("Ambiguous commit ID prefix.");
+                    System.exit(0);
+                }
+                commit = readObject(file, Commit.class);
+            }
+        }
+        return commit;
+    }
+
+
+    /* Return true if the two commit has the same UID. */
+    @Override
+    public boolean equals(Object other){
+        if(this == other) return true;
+        if(other == null || this.getClass() != other.getClass()) return false;
+        return this.getUID().equals(((Commit)other).getUID());
+    }
+
+
+
+    /* A helper method to print out the needed information
+    to check if the object is what we expected. */
+    @Override
+    public void dump() {
+        System.out.println("Message: " + message);
+        System.out.println("Time: " + timestamp);
+        System.out.println("ParentUID：" + parentUID);
+        for (String fileName : fileMap.keySet()) {
+            System.out.println(fileName + " -> " + fileMap.get(fileName));
+        }
+    }
+
 }
