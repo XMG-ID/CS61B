@@ -19,7 +19,7 @@ public class Main {
                 break;
             case "add":
                 if (args.length != 2) {
-                    handleErrorAndExit("Invalid operands for add.");
+                    handleErrorAndExit("Incorrect operands.");
                 }
                 Repository.add(args[1]);
                 break;
@@ -31,7 +31,7 @@ public class Main {
                 break;
             case "rm":
                 if (args.length != 2) {
-                    handleErrorAndExit("Invalid operands for remove.");
+                    handleErrorAndExit("Incorrect operands.");
                 }
                 Repository.remove(args[1]);
                 break;
@@ -58,36 +58,35 @@ public class Main {
                 } else if (args.length == 2) {// checkout [branch name]
                     Repository.checkoutBranch(args[1]);
                 } else {
-                    handleErrorAndExit("Invalid operands for checkout.");
+                    handleErrorAndExit("Incorrect operands.");
                 }
                 break;
             case "branch":
                 if (args.length != 2) {
-                    handleErrorAndExit("Invalid operands for branch.");
+                    handleErrorAndExit("Incorrect operands.");
                 }
                 Repository.branch(args[1]);
                 break;
             case "rm-branch":
                 if (args.length != 2) {
-                    handleErrorAndExit("Invalid operands for rm-branch.");
+                    handleErrorAndExit("Incorrect operands.");
                 }
                 Repository.removeBranch(args[1]);
                 break;
             case "reset":
                 if (args.length != 2) {
-                    handleErrorAndExit("Invalid operands for reset.");
+                    handleErrorAndExit("Incorrect operands.");
                 }
                 Repository.reset(args[1]);
                 break;
             case "merge":
                 if (args.length != 2) {
-                    handleErrorAndExit("Invalid operands for merge.");
+                    handleErrorAndExit("Incorrect operands.");
                 }
                 Repository.merge(args[1]);
                 break;
             default:
-                System.out.println("Invalid command. Please try again.");
-                System.exit(0);
+                handleErrorAndExit("No command with that name exists.");
                 break;
         }
     }

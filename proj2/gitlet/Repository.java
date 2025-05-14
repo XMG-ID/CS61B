@@ -192,6 +192,10 @@ public class Repository {
 
     /* Print out the Branches, Staged Files and Removed Files in lexicographic order. */
     public static void status() {
+        if(!GITLET_DIR.exists()){
+            handleErrorAndExit("Not in an initialized Gitlet directory.");
+        }
+
         StagingArea area = getStagingArea();
 
         System.out.print("=== Branches ===\n*");
