@@ -401,10 +401,23 @@ public class Repository {
     /* Merge files from the given branch into the current branch. */
     public static void merge(String givenBranch) {
         String currentBranch = getCurrentBranch();
+        StagingArea area = getStagingArea();
         File currentBranchFile = join(REFS_DIR, currentBranch);
 
         Commit currentHead = getHeadCommit(currentBranch);
         Commit givenHead = getHeadCommit(givenBranch);
+
+        // Handle failure cases
+        if(!area.isEmpty()){
+            handleErrorAndExit("You have uncommitted changes.");
+        }
+        if(givenHead == null){
+            handleErrorAndExit("A branch with that name does not exist.");
+        }
+        if(givenBranch.equals(currentBranch)){
+            handleErrorAndExit("Cannot merge a branch with itself.");
+        }
+
         Commit splitPoint = latestCommonAncestor(givenBranch, currentBranch);
 
         /* Two cases that don't need to merge, not error but early return. */
@@ -438,7 +451,9 @@ public class Repository {
 
     /* Given the branch name, return the branch's head commit. */
     private static Commit getHeadCommit(String branch) {
-        String UID = readContentsAsString(join(REFS_DIR, branch));
+        File branchFile = join(REFS_DIR, branch);
+        if(!branchFile.exists()) return null;
+        String UID = readContentsAsString(branchFile);
         return Commit.getCommit(UID);
     }
 
@@ -472,7 +487,7 @@ public class Repository {
                 add(fileName);
                 continue;
             }
-            if (givenRemoved && !currentModified) { // Exist in splitPoint but removed in given, unmodified in current
+            if (givenRemoved &&  UIDInSplit.equals(UIDInCurrent)) { // Exist in splitPoint but removed in given, unmodified in current
                 remove(fileName);
                 continue;
             }
