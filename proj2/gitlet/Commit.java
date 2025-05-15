@@ -3,10 +3,7 @@ package gitlet;
 import java.io.File;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 import static gitlet.Repository.CWD;
 import static gitlet.Repository.OBJECTS_DIR;
@@ -118,7 +115,7 @@ public class Commit implements Serializable, Dumpable {
         File[] files = OBJECTS_DIR.listFiles();
         Commit commit = null;
 
-        if (files == null) {
+        if (files == null || prefix == null) {
             return null;
         }
         for (File file : files) {
@@ -131,6 +128,18 @@ public class Commit implements Serializable, Dumpable {
             }
         }
         return commit;
+    }
+
+    /* Return the Collection of its parents commit. */
+    public Iterable<Commit> getParents(){
+        List<Commit> parents = new ArrayList<>();
+        if(parentUID != null){
+            parents.add(Commit.getCommit(parentUID));
+        }
+        if(secondParentUID != null){
+            parents.add(Commit.getCommit(secondParentUID));
+        }
+        return parents;
     }
 
 

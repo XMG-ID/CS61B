@@ -544,24 +544,34 @@ public class Repository {
 
         for (String UID : ancestor1.keySet()) {
             if (!ancestor2.containsKey(UID)) continue;
-            int depth = ancestor1.get(UID);
+            int depth = ancestor1.get(UID) + ancestor2.get(UID);
             if (depth < minDepth) {
                 minDepth = depth;
                 splitPointUID = UID;
             }
         }
-        return splitPointUID == null ? null : Commit.getCommit(splitPointUID);
+        return Commit.getCommit(splitPointUID);
     }
 
-    /* Return Map<commitUID, depth> of the given branch. */
+    /* Return Map<commitUID, depth> of the given branch. It is a breath first search. */
     private static Map<String, Integer> getAllAncestorWithDepth(String branch) {
-        Commit curCommit = Commit.getCommit(readContentsAsString(join(REFS_DIR, branch)));
+        Commit start = Commit.getCommit(readContentsAsString(join(REFS_DIR, branch)));
         Map<String, Integer> commitMap = new HashMap<>();
-        int depth = 0;
-        while (curCommit != null) {
-            commitMap.put(curCommit.getUID(), depth);
-            curCommit = curCommit.parentCommit();
-            depth++;
+
+        Queue<Commit> queue = new LinkedList<>();
+        queue.offer(start);
+        commitMap.put(start.getUID(), 0);
+
+        while(!queue.isEmpty()){
+            Commit current = queue.poll();
+            int curDepth = commitMap.get(current.getUID());
+            for(Commit parent: current.getParents()){
+                if(parent == null) continue;// To prevent null parent
+                if(!commitMap.containsKey(parent.getUID())){
+                    commitMap.put(parent.getUID(),curDepth + 1);
+                    queue.offer(parent);
+                }
+            }
         }
         return commitMap;
     }
