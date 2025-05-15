@@ -402,38 +402,44 @@ public class Repository {
     public static void merge(String givenBranch) {
         String currentBranch = getCurrentBranch();
         File currentBranchFile = join(REFS_DIR, currentBranch);
-        File givenBranchFile = join(REFS_DIR, givenBranch);
-        Commit currentBranchHead = readObject(currentBranchFile, Commit.class);
-        Commit givenBranchHead = readObject(givenBranchFile, Commit.class);
+
+        Commit currentHead = getHeadCommit(currentBranch);
+        Commit givenHead = getHeadCommit(givenBranch);
         Commit splitPoint = latestCommonAncestor(givenBranch, currentBranch);
 
         /* Two cases that don't need to merge, not error but early return. */
-        if (givenBranchHead.equals(splitPoint)) {
+        if (givenHead.equals(splitPoint)) {
             System.out.println("Given branch is an ancestor of the current branch.");
             return;
         }
-        if (currentBranchHead.equals(splitPoint)) {
+        if (currentHead.equals(splitPoint)) {
             /* Fast-forward the currentBranchHead to the givenBranchHead
              *  Just move the currentBranchHead to point at the givenBranchHead.
              *  And since the head is changed, we should change the CWD to the givenCommit. */
-            writeContents(currentBranchFile, givenBranchHead.getUID());
-            checkoutCommit(givenBranchHead);
+            writeContents(currentBranchFile, givenHead.getUID());
+            checkoutCommit(givenHead);
             System.out.println("Current branch fast-forwarded.");
             return;
         }
 
         /* Merge the files, return true if encounter merge conflict. */
-        boolean hasConflict = mergeFiles(currentBranchHead, givenBranchHead, splitPoint);
+        boolean hasConflict = mergeFiles(currentHead, givenHead, splitPoint);
 
         /* Commit automatically. */
         Formatter formatter = new Formatter();
         String message = formatter.format("Merged %s into %s", givenBranch, currentBranch).toString();
-        commit(message, givenBranchHead.getUID());
+        commit(message, givenHead.getUID());
 
         /* After everything is done, print out the conflict message. */
         if (hasConflict) {
             System.out.println("Encountered a merge conflict.");
         }
+    }
+
+    /* Given the branch name, return the branch's head commit. */
+    private static Commit getHeadCommit(String branch){
+        String UID = readContentsAsString(join(REFS_DIR, branch));
+        return Commit.getCommit(UID);
     }
 
 
@@ -456,7 +462,7 @@ public class Repository {
             boolean givenAdded = UIDInSplit == null && UIDInGiven != null;
             boolean currentRemoved = UIDInSplit != null && UIDInCurrent == null;
             boolean givenRemoved = UIDInSplit != null && UIDInGiven == null;
-            boolean sameModified = (UIDInCurrent == null && UIDInGiven == null) || UIDInCurrent.equals(UIDInGiven);
+            boolean sameModified = Objects.equals(UIDInCurrent,UIDInGiven);
 
             if (givenModified && !currentModified) {// Only modify in the given branch
                 checkoutFile(fileName, given.getUID());
@@ -529,8 +535,6 @@ public class Repository {
         }
     }
 
-
-    //todo ====== The following two method now don't fit the secondParent situation.=====
 
     /* Return the latest common ancestor (just a commit) for two given branch. */
     private static Commit latestCommonAncestor(String branch1, String branch2) {
