@@ -460,32 +460,26 @@ public class Repository {
             boolean givenModified = UIDInSplit != null && UIDInGiven != null && !UIDInSplit.equals(UIDInGiven);
             boolean currentAdded = UIDInSplit == null && UIDInCurrent != null;
             boolean givenAdded = UIDInSplit == null && UIDInGiven != null;
-            boolean currentRemoved = UIDInSplit != null && UIDInCurrent == null;
             boolean givenRemoved = UIDInSplit != null && UIDInGiven == null;
-            boolean sameModified = Objects.equals(UIDInCurrent, UIDInGiven);
 
             if (givenModified && !currentModified) {// Only modify in the given branch
                 checkoutFile(fileName, given.getUID());
                 add(fileName);
-            } else if (currentModified && !givenModified) {// Only modify in the current branch
                 continue;
-            } else if (sameModified) {// Two branch have the same modification
-                continue;
-            } else if (currentAdded && !givenAdded) { // Only add in the current branch
-                continue;
-            } else if (givenAdded && !currentAdded) { // Only add in the given branch
+            }
+            if (givenAdded && !currentAdded) { // Only add in the given branch
                 checkoutFile(fileName, given.getUID());
                 add(fileName);
-            } else if (givenRemoved && !currentModified) { // Exist in splitPoint but removed in given, unmodified in current
-                remove(fileName);
-            } else if (currentRemoved) { // Exist in splitPoint but removed in current, unmodified in given
                 continue;
-            } else if (hasMergeConflict(UIDInCurrent, UIDInGiven, UIDInSplit)) {
+            }
+            if (givenRemoved && !currentModified) { // Exist in splitPoint but removed in given, unmodified in current
+                remove(fileName);
+                continue;
+            }
+            if (hasMergeConflict(UIDInCurrent, UIDInGiven, UIDInSplit)) {
                 rewriteConflictFile(fileName, UIDInCurrent, UIDInGiven);
                 add(fileName);
                 hasConflict = true;
-            } else {
-                handleErrorAndExit("Merge encounters a mysterious error.");
             }
         }
         return hasConflict;
@@ -497,15 +491,18 @@ public class Repository {
     private static void rewriteConflictFile(String fileName, String UIDInCurrent, String UIDInGiven) {
         // Locate the conflict file in the CWD, current branch and given branch
         File conflictFile = join(CWD, fileName);
-        File currentFile = join(OBJECTS_DIR, UIDInCurrent);
-        File givenFile = join(OBJECTS_DIR, UIDInGiven);
         if (!conflictFile.exists()) {
             tryCreate(conflictFile);
         }
+
+        // Handle null pointer
+        String givenContent = UIDInGiven == null ? "" : readStoredFile(join(OBJECTS_DIR, UIDInGiven));
+        String currentContent = UIDInCurrent == null ? "" : readStoredFile(join(OBJECTS_DIR, UIDInCurrent));
+
         // Rewrite it with the conflict message
         Formatter formatter = new Formatter();
         String conflictMessage = formatter.format("<<<<<<< HEAD\n%s\n=======\n%s>>>>>>>",
-                readStoredFile(currentFile), readStoredFile(givenFile)).toString();
+                currentContent, givenContent).toString();
 
         writeContents(conflictFile, conflictMessage);
     }
@@ -638,11 +635,11 @@ public class Repository {
     private static void printCommit(Commit commit) {
         Formatter formatter = new Formatter();
         SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM d HH:mm:ss yyyy Z", Locale.ENGLISH);
-        if(commit.secondParentUID == null){
+        if (commit.secondParentUID == null) {
             formatter.format("===\ncommit %s\nDate: %s\n%s\n\n", commit.getUID(), commit.timestamp, commit.message);
-        }else{// The commit is a merged commit, we should add more information
+        } else {// The commit is a merged commit, we should add more information
             formatter.format("===\ncommit %s\nMerge: %s %s\nDate: %s\n%s\n\n", commit.getUID(),
-                    commit.parentUID.substring(0,7),commit.secondParentUID.substring(0,7),commit.timestamp, commit.message);
+                    commit.parentUID.substring(0, 7), commit.secondParentUID.substring(0, 7), commit.timestamp, commit.message);
         }
         System.out.print(formatter.toString());
     }
