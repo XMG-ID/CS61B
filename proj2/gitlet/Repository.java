@@ -466,7 +466,7 @@ public class Repository {
 
             if (givenModified && !currentModified) {// Only modify in the given branch
                 checkoutFile(fileName, given.getUID());
-                area.addFile(fileName, UIDInGiven);
+                add(fileName);
             } else if (currentModified && !givenModified) {// Only modify in the current branch
                 continue;
             } else if (sameModified) {// Two branch have the same modification
@@ -475,7 +475,7 @@ public class Repository {
                 continue;
             } else if (givenAdded && !currentAdded) { // Only add in the given branch
                 checkoutFile(fileName, given.getUID());
-                area.addFile(fileName, UIDInGiven);
+                add(fileName);
             } else if (givenRemoved && !currentModified) { // Exist in splitPoint but removed in given, unmodified in current
                 remove(fileName);
             } else if (currentRemoved) { // Exist in splitPoint but removed in current, unmodified in given
@@ -633,6 +633,7 @@ public class Repository {
         System.out.println();
     }
 
+
     /* A helper method to print commit in specified format. */
     private static void printCommit(Commit commit) {
         Formatter formatter = new Formatter();
@@ -645,7 +646,6 @@ public class Repository {
         }
         System.out.print(formatter.toString());
     }
-
 
     /* Change the head to point at the given commit. */
     private static void changeHeadTo(Commit newCommit) {
