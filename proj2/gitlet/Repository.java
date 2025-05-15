@@ -408,14 +408,17 @@ public class Repository {
         Commit givenHead = getHeadCommit(givenBranch);
 
         // Handle failure cases
-        if(!area.isEmpty()){
+        if (!area.isEmpty()) {
             handleErrorAndExit("You have uncommitted changes.");
         }
-        if(givenHead == null){
+        if (givenHead == null) {
             handleErrorAndExit("A branch with that name does not exist.");
         }
-        if(givenBranch.equals(currentBranch)){
+        if (givenBranch.equals(currentBranch)) {
             handleErrorAndExit("Cannot merge a branch with itself.");
+        }
+        if (hasUntrackedFileConflict(givenHead)) {
+            handleErrorAndExit("There is an untracked file in the way; delete it, or add and commit it first.");
         }
 
         Commit splitPoint = latestCommonAncestor(givenBranch, currentBranch);
@@ -449,10 +452,11 @@ public class Repository {
         }
     }
 
+
     /* Given the branch name, return the branch's head commit. */
     private static Commit getHeadCommit(String branch) {
         File branchFile = join(REFS_DIR, branch);
-        if(!branchFile.exists()) return null;
+        if (!branchFile.exists()) return null;
         String UID = readContentsAsString(branchFile);
         return Commit.getCommit(UID);
     }
@@ -487,7 +491,7 @@ public class Repository {
                 add(fileName);
                 continue;
             }
-            if (givenRemoved &&  UIDInSplit.equals(UIDInCurrent)) { // Exist in splitPoint but removed in given, unmodified in current
+            if (givenRemoved && UIDInSplit.equals(UIDInCurrent)) { // Exist in splitPoint but removed in given, unmodified in current
                 remove(fileName);
                 continue;
             }
@@ -516,12 +520,12 @@ public class Repository {
 
         // Rewrite it with the conflict message
         Formatter formatter = new Formatter();
-        if(UIDInGiven == null){
-            formatter.format("<<<<<<< HEAD\n%s\n=======\n>>>>>>>",currentContent);
-        }else if(UIDInCurrent == null){
-            formatter.format("<<<<<<< HEAD\n=======\n%s\n>>>>>>>",givenContent);
-        }else{
-            formatter.format("<<<<<<< HEAD\n%s\n=======\n%s\n>>>>>>>",currentContent, givenContent);
+        if (UIDInGiven == null) {
+            formatter.format("<<<<<<< HEAD\n%s\n=======\n>>>>>>>", currentContent);
+        } else if (UIDInCurrent == null) {
+            formatter.format("<<<<<<< HEAD\n=======\n%s\n>>>>>>>", givenContent);
+        } else {
+            formatter.format("<<<<<<< HEAD\n%s\n=======\n%s\n>>>>>>>", currentContent, givenContent);
         }
 
         writeContents(conflictFile, formatter.toString());
