@@ -501,10 +501,15 @@ public class Repository {
 
         // Rewrite it with the conflict message
         Formatter formatter = new Formatter();
-        String conflictMessage = formatter.format("<<<<<<< HEAD\n%s\n=======\n%s\n>>>>>>>",
-                currentContent, givenContent).toString();
+        if(UIDInGiven == null){
+            formatter.format("<<<<<<< HEAD\n%s\n=======\n>>>>>>>",currentContent);
+        }else if(UIDInCurrent == null){
+            formatter.format("<<<<<<< HEAD\n=======\n%s\n>>>>>>>",givenContent);
+        }else{
+            formatter.format("<<<<<<< HEAD\n%s\n=======\n%s\n>>>>>>>",currentContent, givenContent);
+        }
 
-        writeContents(conflictFile, conflictMessage);
+        writeContents(conflictFile, formatter.toString());
     }
 
 
