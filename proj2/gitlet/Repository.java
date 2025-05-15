@@ -501,7 +501,7 @@ public class Repository {
 
         // Rewrite it with the conflict message
         Formatter formatter = new Formatter();
-        String conflictMessage = formatter.format("<<<<<<< HEAD\n%s\n=======\n%s>>>>>>>",
+        String conflictMessage = formatter.format("<<<<<<< HEAD\n%s\n=======\n%s\n>>>>>>>",
                 currentContent, givenContent).toString();
 
         writeContents(conflictFile, conflictMessage);
