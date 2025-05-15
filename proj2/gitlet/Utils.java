@@ -125,6 +125,13 @@ class Utils {
         return new String(readContents(file), StandardCharsets.UTF_8);
     }
 
+    /* Since the file(we stored in objects) content is the serialized blob, we cannot read the true content directly.
+     *  We can only read the blob from the file and then get the content. */
+     static String readStoredFile(File file){
+        byte[] content = readObject(file, Blob.class).getContent();
+        return new String(content, StandardCharsets.UTF_8);
+    }
+
     /**
      * Write the result of concatenating the bytes in CONTENTS to FILE,
      * creating or overwriting it as needed.  Each object in CONTENTS may be

@@ -427,7 +427,7 @@ public class Repository {
 
         /* Commit automatically. */
         Formatter formatter = new Formatter();
-        String message = formatter.format("Merged %s into %s", givenBranch, currentBranch).toString();
+        String message = formatter.format("Merged %s into %s.", givenBranch, currentBranch).toString();
         commit(message, givenHead.getUID());
 
         /* After everything is done, print out the conflict message. */
@@ -437,7 +437,7 @@ public class Repository {
     }
 
     /* Given the branch name, return the branch's head commit. */
-    private static Commit getHeadCommit(String branch){
+    private static Commit getHeadCommit(String branch) {
         String UID = readContentsAsString(join(REFS_DIR, branch));
         return Commit.getCommit(UID);
     }
@@ -462,7 +462,7 @@ public class Repository {
             boolean givenAdded = UIDInSplit == null && UIDInGiven != null;
             boolean currentRemoved = UIDInSplit != null && UIDInCurrent == null;
             boolean givenRemoved = UIDInSplit != null && UIDInGiven == null;
-            boolean sameModified = Objects.equals(UIDInCurrent,UIDInGiven);
+            boolean sameModified = Objects.equals(UIDInCurrent, UIDInGiven);
 
             if (givenModified && !currentModified) {// Only modify in the given branch
                 checkoutFile(fileName, given.getUID());
@@ -505,7 +505,7 @@ public class Repository {
         // Rewrite it with the conflict message
         Formatter formatter = new Formatter();
         String conflictMessage = formatter.format("<<<<<<< HEAD\n%s\n=======\n%s>>>>>>>",
-                readContentsAsString(currentFile), readContentsAsString(givenFile)).toString();
+                readStoredFile(currentFile), readStoredFile(givenFile)).toString();
 
         writeContents(conflictFile, conflictMessage);
     }
@@ -566,13 +566,13 @@ public class Repository {
         queue.offer(start);
         commitMap.put(start.getUID(), 0);
 
-        while(!queue.isEmpty()){
+        while (!queue.isEmpty()) {
             Commit current = queue.poll();
             int curDepth = commitMap.get(current.getUID());
-            for(Commit parent: current.getParents()){
-                if(parent == null) continue;// To prevent null parent
-                if(!commitMap.containsKey(parent.getUID())){
-                    commitMap.put(parent.getUID(),curDepth + 1);
+            for (Commit parent : current.getParents()) {
+                if (parent == null) continue;// To prevent null parent
+                if (!commitMap.containsKey(parent.getUID())) {
+                    commitMap.put(parent.getUID(), curDepth + 1);
                     queue.offer(parent);
                 }
             }
@@ -637,10 +637,15 @@ public class Repository {
     private static void printCommit(Commit commit) {
         Formatter formatter = new Formatter();
         SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM d HH:mm:ss yyyy Z", Locale.ENGLISH);
-        formatter.format("===\ncommit %s\nDate: %s\n%s\n\n",
-                commit.getUID(), commit.timestamp, commit.message);
+        if(commit.secondParentUID == null){
+            formatter.format("===\ncommit %s\nDate: %s\n%s\n\n", commit.getUID(), commit.timestamp, commit.message);
+        }else{// The commit is a merged commit, we should add more information
+            formatter.format("===\ncommit %s\nMerge: %s %s\nDate: %s\n%s\n\n", commit.getUID(),
+                    commit.parentUID.substring(0,7),commit.secondParentUID.substring(0,7),commit.timestamp, commit.message);
+        }
         System.out.print(formatter.toString());
     }
+
 
     /* Change the head to point at the given commit. */
     private static void changeHeadTo(Commit newCommit) {
