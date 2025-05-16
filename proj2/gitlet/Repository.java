@@ -264,13 +264,10 @@ public class Repository {
         }
 
         /* Print out the result. */
-        if (fileSet.isEmpty()) {
-            System.out.println();
-            return;
-        }
         for (String file : fileSet) {
             System.out.println(file);
         }
+        System.out.println();
     }
 
 
@@ -325,15 +322,32 @@ public class Repository {
             handleErrorAndExit("No need to checkout the current branch.");
         }
         /* Get the new branch's head commit and deal with the third error. */
-        Commit commit = Commit.getCommit(readContentsAsString(join(REFS_DIR, branch)));
-        if (hasUntrackedFileConflict(commit)) {
+        Commit targetCommit = Commit.getCommit(readContentsAsString(join(REFS_DIR, branch)));
+        if (hasUntrackedFileConflict(targetCommit)) {
             handleErrorAndExit("There is an untracked file in the way; delete it, or add and commit it first.");
         }
-
-        checkoutCommit(commit);
-        /* Record the branch in the HEAD, meaning the current branch is changed. */
+        checkoutCommit(targetCommit);
         writeContents(HEAD, branch);
+        changeHeadTo(targetCommit);
         getStagingArea().clear();
+    }
+
+    /* Change the CWD totally with the given commit -> "Check out(捡出) all the files in the given commit"
+     *  1. Get the new branch's head commitUID. It is in the REF_DIR/branch file.
+     *  2. For each file in the commit's fileMap, writeContent(CWDFile, fileContent).
+     *  3. For each file in current commit's fileMap, if it doesn't exist in commit's fileMap,
+     *     Remove it from the CWD using restrictedDelete. */
+    public static void checkoutCommit(Commit targetCommit) {
+        for (String fileName : targetCommit.fileMap.keySet()) {
+            File newFile = join(CWD, fileName);
+            writeContents(newFile, (Object) targetCommit.getFileContent(fileName));
+        }
+        for (String fileName : getCurrentCommit().fileMap.keySet()) {
+            if (targetCommit.fileMap.containsKey(fileName)) {
+                continue;
+            }
+            restrictedDelete(join(CWD, fileName));
+        }
     }
 
     /* Reset to a commit simply means checkout commit and reset the HEAD. */
@@ -350,24 +364,6 @@ public class Repository {
         getStagingArea().clear();
     }
 
-
-    /* Change the CWD totally with the given commit -> "Check out(捡出) all the files in the given commit"
-     *  1. Get the new branch's head commitUID. It is in the REF_DIR/branch file.
-     *  2. For each file in the commit's fileMap, writeContent(CWDFile, fileContent).
-     *  3. For each file in current commit's fileMap, if it doesn't exist in commit's fileMap,
-     *     Remove it from the CWD using restrictedDelete. */
-    public static void checkoutCommit(Commit commit) {
-        for (String fileName : commit.fileMap.keySet()) {
-            File newFile = join(CWD, fileName);
-            writeContents(newFile, (Object) commit.getFileContent(fileName));
-        }
-        for (String fileName : getCurrentCommit().fileMap.keySet()) {
-            if (commit.fileMap.containsKey(fileName)) {
-                continue;
-            }
-            restrictedDelete(fileName);
-        }
-    }
 
 
     /* Create a new branch with the given name and it should point to the current commit. */
@@ -432,8 +428,9 @@ public class Repository {
             /* Fast-forward the currentBranchHead to the givenBranchHead
              *  Just move the currentBranchHead to point at the givenBranchHead.
              *  And since the head is changed, we should change the CWD to the givenCommit. */
-            writeContents(currentBranchFile, givenHead.getUID());
             checkoutCommit(givenHead);
+            changeHeadTo(givenHead);
+            writeContents(currentBranchFile, givenHead.getUID());
             System.out.println("Current branch fast-forwarded.");
             return;
         }
@@ -519,16 +516,16 @@ public class Repository {
         String currentContent = UIDInCurrent == null ? "" : readStoredFile(join(OBJECTS_DIR, UIDInCurrent));
 
         // Rewrite it with the conflict message
-        Formatter formatter = new Formatter();
-        if (UIDInGiven == null) {
-            formatter.format("<<<<<<< HEAD\n%s\n=======\n>>>>>>>", currentContent);
-        } else if (UIDInCurrent == null) {
-            formatter.format("<<<<<<< HEAD\n=======\n%s\n>>>>>>>", givenContent);
-        } else {
-            formatter.format("<<<<<<< HEAD\n%s\n=======\n%s\n>>>>>>>", currentContent, givenContent);
-        }
+        StringBuilder conflictContentBuilder = new StringBuilder();
+        conflictContentBuilder.append("<<<<<<< HEAD\n");
+        // 如果currentBranchContent本身可能以换行符结尾，而我们只需要内容在一行，可能需要 trim() 或更复杂的处理
+        // 但根据conflict1.txt，内容是单独一行
+        conflictContentBuilder.append(currentContent); // currentContent本身不应包含末尾的 \n 以匹配 conflict1.txt 的第2行
+        conflictContentBuilder.append("\n=======\n");
+        conflictContentBuilder.append(givenContent); // givenContent本身不应包含末尾的 \n 以匹配 conflict1.txt 的第4行
+        conflictContentBuilder.append("\n>>>>>>>");
 
-        writeContents(conflictFile, formatter.toString());
+        writeContents(conflictFile, conflictContentBuilder.toString());
     }
 
 
@@ -660,7 +657,7 @@ public class Repository {
         Formatter formatter = new Formatter();
         SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM d HH:mm:ss yyyy Z", Locale.ENGLISH);
         if (commit.secondParentUID == null) {
-            formatter.format("===\ncommit %s\nDate: %s\n%s\n\n", commit.getUID(), commit.timestamp, commit.message);
+            formatter.format("===\ncommit %s\nDate: %s\n%s\n", commit.getUID(), commit.timestamp, commit.message);
         } else {// The commit is a merged commit, we should add more information
             formatter.format("===\ncommit %s\nMerge: %s %s\nDate: %s\n%s\n\n", commit.getUID(),
                     commit.parentUID.substring(0, 7), commit.secondParentUID.substring(0, 7), commit.timestamp, commit.message);
