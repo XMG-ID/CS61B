@@ -657,7 +657,7 @@ public class Repository {
         Formatter formatter = new Formatter();
         SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM d HH:mm:ss yyyy Z", Locale.ENGLISH);
         if (commit.secondParentUID == null) {
-            formatter.format("===\ncommit %s\nDate: %s\n%s\n", commit.getUID(), commit.timestamp, commit.message);
+            formatter.format("===\ncommit %s\nDate: %s\n%s\n\n", commit.getUID(), commit.timestamp, commit.message);
         } else {// The commit is a merged commit, we should add more information
             formatter.format("===\ncommit %s\nMerge: %s %s\nDate: %s\n%s\n\n", commit.getUID(),
                     commit.parentUID.substring(0, 7), commit.secondParentUID.substring(0, 7), commit.timestamp, commit.message);
